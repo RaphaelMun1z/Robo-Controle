@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0c10">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Robô ESP32</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;600;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #0a0c10;
+    --panel:   #111420;
+    --surface: #161b28;
+    --accent:  #00e5ff;
+    --red:     #ff3d6b;
+    --green:   #00ff88;
+    --warn:    #ffb800;
+    --text:    #cdd6f4;
+    --muted:   #4a5270;
+    --r:       14px;
+    --glow:    0 0 18px rgba(0,229,255,0.4);
+    --glow-r:  0 0 18px rgba(255,61,107,0.4);
+    --glow-g:  0 0 14px rgba(0,255,136,0.4);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Exo 2', sans-serif;
+    overflow: hidden;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* scanlines */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg,
+      transparent, transparent 3px,
+      rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── Layout ── */
+  #app {
+    display: grid;
+    grid-template-rows: 56px 1fr 80px;
+    height: 100%;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--panel);
+    border-radius: var(--r);
+    border: 1px solid rgba(0,229,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+  }
+
+  header h1 {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-shadow: var(--glow);
+  }
+
+  #bt-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    transition: color .3s;
+  }
+  #bt-status.connected { color: var(--green); }
+  #bt-status.error     { color: var(--red); }
+
+  #bt-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background .3s, box-shadow .3s;
+    flex-shrink: 0;
+  }
+  #bt-status.connected #bt-dot { background: var(--green); box-shadow: var(--glow-g); }
+  #bt-status.error     #bt-dot { background: var(--red);   box-shadow: var(--glow-r); }
+
+  /* ── Main ── */
+  #main {
+    display: grid;
+    grid-template-columns: 1fr 148px;
+    gap: 8px;
+    min-height: 0;
+  }
+
+  /* ── Joystick panel ── */
+  #joy-panel {
+    background: var(--panel);
+    border-radius: var(--r);
+    border: 1px solid rgba(0,229,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #joy-panel::before, #joy-panel::after {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    border-color: rgba(0,229,255,0.25);
+    border-style: solid;
+  }
+  #joy-panel::before { top: 10px; left: 10px; border-width: 2px 0 0 2px; }
+  #joy-panel::after  { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
+
+  #joy-zone {
+    position: relative;
+    width: 230px; height: 230px;
+    flex-shrink: 0;
+  }
+
+  #joy-base {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, #1a2035 0%, #0d1020 100%);
+    border: 2px solid rgba(0,229,255,0.18);
+    box-shadow: 0 0 40px rgba(0,229,255,0.04) inset;
+  }
+
+  /* guides */
+  #joy-base::before, #joy-base::after {
+    content: '';
+    position: absolute;
+    background: rgba(0,229,255,0.05);
+  }
+  #joy-base::before { left:50%; top:10%; width:1px; height:80%; transform:translateX(-50%); }
+  #joy-base::after  { top:50%; left:10%; height:1px; width:80%; transform:translateY(-50%); }
+
+  #deadzone-ring {
+    position: absolute;
+    top:50%; left:50%;
+    width:48px; height:48px;
+    transform: translate(-50%,-50%);
+    border-radius: 50%;
+    border: 1px dashed rgba(0,229,255,0.12);
+  }
+
+  .arr {
+    position: absolute;
+    font-size: 13px;
+    color: var(--muted);
+    transition: color .12s, text-shadow .12s;
+    line-height: 1;
+  }
+  .arr.lit { color: var(--accent); text-shadow: var(--glow); }
+  #a-up    { top:8px;    left:50%; transform:translateX(-50%); }
+  #a-down  { bottom:8px; left:50%; transform:translateX(-50%); }
+  #a-left  { left:8px;   top:50%;  transform:translateY(-50%); }
+  #a-right { right:8px;  top:50%;  transform:translateY(-50%); }
+
+  #joy-knob {
+    position: absolute;
+    width: 72px; height: 72px;
+    top:50%; left:50%;
+    transform: translate(-50%,-50%);
+    border-radius: 50%;
+    background: radial-gradient(circle at 36% 36%, #253048, #0d1525);
+    border: 2px solid rgba(0,229,255,0.45);
+    box-shadow: var(--glow), 0 6px 24px rgba(0,0,0,0.6);
+    cursor: grab;
+    transition: border-color .12s, box-shadow .12s;
+    z-index: 2;
+    will-change: transform;
+  }
+  #joy-knob.drag {
+    border-color: var(--accent);
+    box-shadow: 0 0 30px rgba(0,229,255,0.65), 0 6px 24px rgba(0,0,0,0.6);
+    cursor: grabbing;
+  }
+  #joy-knob::after {
+    content:'';
+    position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:12px; height:12px;
+    border-radius:50%;
+    background: var(--accent);
+    opacity:.65;
+    box-shadow: var(--glow);
+  }
+
+  /* ── Right panel ── */
+  #right {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card {
+    background: var(--panel);
+    border-radius: var(--r);
+    border: 1px solid rgba(0,229,255,0.08);
+    padding: 14px 12px;
+  }
+
+  .clabel {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .cval {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    color: var(--accent);
+    text-shadow: var(--glow);
+    line-height: 1;
+    min-height: 26px;
+  }
+
+  #vec-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    margin-top: 10px;
+  }
+  .vv {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .vv span { color: var(--text); }
+
+  /* telemetry flex fill */
+  #card-tele { flex: 1; }
+
+  /* mode */
+  #mode-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--warn);
+    text-shadow: 0 0 10px rgba(255,184,0,.45);
+    transition: color .3s, text-shadow .3s;
+  }
+  #mode-val.manual { color: var(--accent); text-shadow: var(--glow); }
+
+  /* connect button */
+  #btn-connect {
+    width: 100%;
+    margin-top: 8px;
+    padding: 9px 0;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: background .2s, box-shadow .2s;
+    text-transform: uppercase;
+  }
+  #btn-connect:active { background: rgba(0,229,255,.12); box-shadow: var(--glow); }
+  #btn-connect:disabled {
+    border-color: var(--muted); color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  /* ── Bottom bar ── */
+  #bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .bot-btn {
+    border-radius: var(--r);
+    border: none;
+    cursor: pointer;
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: opacity .15s, transform .1s;
+  }
+  .bot-btn:active { transform: scale(.97); opacity: .82; }
+
+  #btn-stop {
+    background: linear-gradient(135deg,#2a0a12,#1a0508);
+    color: var(--red);
+    border: 1px solid rgba(255,61,107,.4);
+    box-shadow: 0 0 20px rgba(255,61,107,.12) inset;
+  }
+
+  #btn-mode {
+    background: linear-gradient(135deg,#0a1a10,#051208);
+    color: var(--green);
+    border: 1px solid rgba(0,255,136,.25);
+    box-shadow: 0 0 20px rgba(0,255,136,.08) inset;
+  }
+
+  /* ── Overlay (sem suporte BT) ── */
+  #overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,12,16,.95);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+    padding: 32px;
+  }
+  #overlay.show { display: flex; }
+  #overlay h2 { font-size: 18px; color: var(--red); letter-spacing: 2px; }
+  #overlay p  { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 300px; }
+</style>
+</head>
+<body>
+
+<!-- Overlay: navegador sem suporte -->
+<div id="overlay">
+  <h2>⚠ Web Bluetooth indisponível</h2>
+  <p>Use o <strong style="color:var(--text)">Chrome ou Edge</strong> no Android.<br>
+  Safari/iOS não suporta Web Bluetooth API.</p>
+</div>
+
+<div id="app">
+
+  <header>
+    <h1>Robô&nbsp;ESP32</h1>
+    <div id="bt-status">
+      <div id="bt-dot"></div>
+      <span id="bt-label">DESCONECTADO</span>
+    </div>
+  </header>
+
+  <div id="main">
+
+    <!-- Joystick -->
+    <div id="joy-panel">
+      <div id="joy-zone">
+        <div id="joy-base">
+          <div id="deadzone-ring"></div>
+          <span class="arr" id="a-up">▲</span>
+          <span class="arr" id="a-down">▼</span>
+          <span class="arr" id="a-left">◀</span>
+          <span class="arr" id="a-right">▶</span>
+        </div>
+        <div id="joy-knob"></div>
+      </div>
+    </div>
+
+    <!-- Painel direito -->
+    <div id="right">
+
+      <div class="card" id="card-tele">
+        <span class="clabel">Comando</span>
+        <div class="cval" id="cmd-val">—</div>
+        <div id="vec-grid">
+          <div class="vv">X: <span id="vx">0</span></div>
+          <div class="vv">Y: <span id="vy">0</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="clabel">Modo</span>
+        <div id="mode-val">AUTÔNOMO</div>
+        <button id="btn-connect" onclick="btConnect()">Conectar BT</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="bottom">
+    <button class="bot-btn" id="btn-stop"
+      ontouchstart="sendCmd('S')" onclick="sendCmd('S')">■ Parar</button>
+    <button class="bot-btn" id="btn-mode"
+      ontouchstart="toggleMode()" onclick="toggleMode()">⟳ Modo</button>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+
+// ──────────────────────────────────────────────
+//  UUIDs — devem ser idênticos ao ESP32
+// ──────────────────────────────────────────────
+const SERVICE_UUID        = '12345678-1234-1234-1234-123456789abc';
+const CHARACTERISTIC_UUID = 'abcd1234-ab12-ab12-ab12-abcdef123456';
+
+// ──────────────────────────────────────────────
+//  Estado
+// ──────────────────────────────────────────────
+const st = {
+  device:     null,
+  server:     null,
+  char:       null,
+  connected:  false,
+  dragging:   false,
+  cx: 0, cy: 0, radius: 0,
+  currentCmd: '',
+  lastCmd:    '',
+  modoAuto:   true,
+  sendTimer:  null,
+};
+
+const DEAD   = 24;   // px zona morta
+const RATE   = 120;  // ms taxa de envio
+
+// ──────────────────────────────────────────────
+//  DOM
+// ──────────────────────────────────────────────
+const knob    = document.getElementById('joy-knob');
+const base    = document.getElementById('joy-base');
+const cmdVal  = document.getElementById('cmd-val');
+const vxEl    = document.getElementById('vx');
+const vyEl    = document.getElementById('vy');
+const modeEl  = document.getElementById('mode-val');
+const btSt    = document.getElementById('bt-status');
+const btLbl   = document.getElementById('bt-label');
+const btnConn = document.getElementById('btn-connect');
+const arrs    = {
+  up:    document.getElementById('a-up'),
+  down:  document.getElementById('a-down'),
+  left:  document.getElementById('a-left'),
+  right: document.getElementById('a-right'),
+};
+
+// ──────────────────────────────────────────────
+//  Verificar suporte Web Bluetooth
+// ──────────────────────────────────────────────
+if (!navigator.bluetooth) {
+  document.getElementById('overlay').classList.add('show');
+}
+
+// ──────────────────────────────────────────────
+//  Bluetooth
+// ──────────────────────────────────────────────
+async function btConnect() {
+  if (st.connected) { btDisconnect(); return; }
+
+  btnConn.textContent = 'BUSCANDO...';
+  btnConn.disabled = true;
+
+  try {
+    st.device = await navigator.bluetooth.requestDevice({
+      filters: [{ name: 'Robo_ESP32' }],
+      optionalServices: [SERVICE_UUID],
+    });
+
+    st.device.addEventListener('gattserverdisconnected', onDisconnected);
+
+    st.server = await st.device.gatt.connect();
+    const service = await st.server.getPrimaryService(SERVICE_UUID);
+    st.char = await service.getCharacteristic(CHARACTERISTIC_UUID);
+
+    setConnected(true);
+  } catch (err) {
+    console.warn('[BT]', err);
+    setConnected(false);
+    btnConn.textContent = 'CONECTAR BT';
+    btnConn.disabled = false;
+  }
+}
+
+function btDisconnect() {
+  if (st.device?.gatt.connected) st.device.gatt.disconnect();
+  onDisconnected();
+}
+
+function onDisconnected() {
+  setConnected(false);
+  sendStop();
+}
+
+function setConnected(ok) {
+  st.connected = ok;
+  btSt.className = ok ? 'connected' : '';
+  btLbl.textContent = ok ? (st.device?.name ?? 'CONECTADO') : 'DESCONECTADO';
+  btnConn.textContent = ok ? 'DESCONECTAR' : 'CONECTAR BT';
+  btnConn.disabled = false;
+}
+
+async function sendCmd(cmd) {
+  // Atualiza UI sempre
+  if (cmd !== st.lastCmd) {
+    st.lastCmd = cmd;
+    cmdVal.textContent =
+      cmd === 'S' ? 'STOP'     : cmd === 'F' ? 'FRENTE' :
+      cmd === 'B' ? 'RÉ'       : cmd === 'L' ? 'ESQUERDA' :
+      cmd === 'R' ? 'DIREITA'  : cmd === 'A' ? 'MODO'   : cmd;
+  }
+
+  if (!st.connected || !st.char) return;
+
+  try {
+    const enc = new TextEncoder().encode(cmd);
+    await st.char.writeValueWithoutResponse(enc);
+  } catch (e) {
+    console.warn('[BT] Erro ao enviar:', e);
+  }
+}
+
+// ──────────────────────────────────────────────
+//  Joystick
+// ──────────────────────────────────────────────
+function calibrate() {
+  const r = base.getBoundingClientRect();
+  st.cx     = r.left + r.width  / 2;
+  st.cy     = r.top  + r.height / 2;
+  st.radius = r.width / 2 - 8;
+}
+
+function pos(e) {
+  const t = e.touches ? e.touches[0] : e;
+  return { x: t.clientX, y: t.clientY };
+}
+
+function moveKnob(px, py) {
+  let dx = px - st.cx;
+  let dy = py - st.cy;
+  const dist = Math.hypot(dx, dy);
+
+  if (dist > st.radius) {
+    dx = (dx / dist) * st.radius;
+    dy = (dy / dist) * st.radius;
+  }
+
+  knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+  vxEl.textContent = Math.round(dx);
+  vyEl.textContent = Math.round(-dy);
+
+  const inDead = dist < DEAD;
+  let cmd = 'S';
+
+  if (!inDead) {
+    const angle = Math.atan2(-dy, dx) * (180 / Math.PI);
+    if      (angle >=  -45 && angle <   45) cmd = 'R';
+    else if (angle >=   45 && angle <  135) cmd = 'F';
+    else if (angle >=  135 || angle < -135) cmd = 'L';
+    else                                    cmd = 'B';
+  }
+
+  Object.entries(arrs).forEach(([k, el]) => {
+    const map = { up:'F', down:'B', left:'L', right:'R' };
+    el.classList.toggle('lit', map[k] === cmd);
+  });
+
+  st.currentCmd = cmd;
+}
+
+function sendStop() {
+  moveKnob(st.cx, st.cy);
+  sendCmd('S');
+  knob.classList.remove('drag');
+}
+
+// Touch
+base.addEventListener('touchstart', e => {
+  e.preventDefault();
+  calibrate();
+  st.dragging = true;
+  knob.classList.add('drag');
+  const { x, y } = pos(e);
+  moveKnob(x, y);
+  sendCmd(st.currentCmd);
+  st.sendTimer = setInterval(() => sendCmd(st.currentCmd), RATE);
+}, { passive: false });
+
+base.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!st.dragging) return;
+  const { x, y } = pos(e);
+  moveKnob(x, y);
+}, { passive: false });
+
+base.addEventListener('touchend', e => {
+  e.preventDefault();
+  st.dragging = false;
+  clearInterval(st.sendTimer);
+  sendStop();
+}, { passive: false });
+
+// Mouse (testes desktop)
+base.addEventListener('mousedown', e => {
+  calibrate();
+  st.dragging = true;
+  knob.classList.add('drag');
+  moveKnob(e.clientX, e.clientY);
+  st.sendTimer = setInterval(() => sendCmd(st.currentCmd), RATE);
+});
+window.addEventListener('mousemove', e => {
+  if (!st.dragging) return;
+  moveKnob(e.clientX, e.clientY);
+});
+window.addEventListener('mouseup', () => {
+  if (!st.dragging) return;
+  st.dragging = false;
+  clearInterval(st.sendTimer);
+  sendStop();
+});
+
+// ──────────────────────────────────────────────
+//  Modo autônomo / manual
+// ──────────────────────────────────────────────
+function toggleMode() {
+  st.modoAuto = !st.modoAuto;
+  modeEl.textContent = st.modoAuto ? 'AUTÔNOMO' : 'MANUAL';
+  modeEl.className   = st.modoAuto ? '' : 'manual';
+  sendCmd('A');
+}
+
+// ──────────────────────────────────────────────
+//  Init
+// ──────────────────────────────────────────────
+window.addEventListener('resize', calibrate);
+calibrate();
+</script>
+</body>
+</html>
