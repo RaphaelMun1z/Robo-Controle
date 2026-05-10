@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#f5f5f0">
+<meta name="theme-color" content="#f0f0eb">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Robô ESP32</title>
@@ -24,6 +24,8 @@
   --green-bg: #f0fdf4;
   --amber:    #d97706;
   --amber-bg: #fffbeb;
+  --purple:   #7c3aed;
+  --purple-bg:#f5f3ff;
   --text:     #111111;
   --muted:    #6b7280;
   --light:    #9ca3af;
@@ -75,57 +77,30 @@ header {
   justify-content: space-between;
   padding: 0 16px;
 }
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-header h1 {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-  color: var(--text);
-}
+.header-left { display: flex; align-items: center; gap: 10px; }
+header h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
 
 #bt-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500; color: var(--muted);
   transition: color .3s;
 }
 #bt-status.connected { color: var(--green); }
 #bt-status.error     { color: var(--red); }
-
 #bt-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--light);
-  transition: background .3s;
-  flex-shrink: 0;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--light); transition: background .3s; flex-shrink: 0;
 }
 #bt-status.connected #bt-dot { background: var(--green); }
 #bt-status.error     #bt-dot { background: var(--red); }
 
 #btn-connect-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1.5px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  font-family: 'Poppins', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: border-color .2s, background .2s;
-  white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: transparent;
+  color: var(--text); font-family: 'Poppins', sans-serif;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: border-color .2s, background .2s; white-space: nowrap;
 }
 #btn-connect-header:hover { border-color: var(--blue); background: var(--blue-bg); color: var(--blue); }
 #btn-connect-header.active { border-color: var(--red); background: var(--red-bg); color: var(--red); }
@@ -133,48 +108,31 @@ header h1 {
 
 /* ── Tabs ── */
 #bottom-tabs {
-  background: var(--surface);
-  border-radius: var(--r);
+  background: var(--surface); border-radius: var(--r);
   border: 1px solid var(--border);
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  padding: 4px;
-  gap: 3px;
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  padding: 4px; gap: 3px;
 }
-
 .tab-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  padding: 6px 4px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  font-family: 'Poppins', sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background .15s, color .15s;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 6px 4px; border-radius: 8px; border: none;
+  background: transparent; color: var(--muted);
+  font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 500;
+  cursor: pointer; transition: background .15s, color .15s;
 }
-.tab-btn svg { flex-shrink: 0; }
 .tab-btn.active { background: var(--accent); color: white; }
 
 /* ── Content ── */
 #content { min-height: 0; position: relative; }
 
 .tab-pane {
-  display: none;
-  height: 100%;
+  display: none; height: 100%;
   position: absolute; inset: 0;
 }
 .tab-pane.active { display: flex; flex-direction: column; gap: 8px; }
 
 /* ── Controle pane ── */
-#pane-ctrl {
-  display: none;
-}
+#pane-ctrl { display: none; }
 #pane-ctrl.active {
   display: grid;
   grid-template-columns: 1fr 130px;
@@ -187,314 +145,190 @@ header h1 {
   border: 1px solid var(--border);
   padding: 14px;
 }
-
 .card-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--muted);
-  margin-bottom: 8px;
-  display: block;
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--muted); margin-bottom: 8px; display: block;
 }
 
-/* Joystick */
-#joy-panel {
+/* ── D-Pad ── */
+#dpad-panel {
   background: var(--surface);
   border-radius: var(--r);
   border: 1px solid var(--border);
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#joy-zone {
-  position: relative;
-  width: 210px; height: 210px;
-  flex-shrink: 0;
-}
-
-#joy-base {
-  position: absolute; inset: 0;
-  border-radius: 50%;
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-}
-
-#joy-base::before { content:''; position:absolute; left:50%; top:12%; width:1px; height:76%; transform:translateX(-50%); background: var(--border); }
-#joy-base::after  { content:''; position:absolute; top:50%; left:12%; height:1px; width:76%; transform:translateY(-50%); background: var(--border); }
-
-#deadzone-ring {
-  position: absolute;
-  top:50%; left:50%;
-  width:44px; height:44px;
-  transform: translate(-50%,-50%);
-  border-radius: 50%;
-  border: 1px dashed var(--border);
-}
-
-.arr {
-  position: absolute;
-  color: var(--light);
-  transition: color .1s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.arr.lit svg path, .arr.lit svg polygon { fill: var(--accent); }
-#a-up    { top:8px;    left:50%; transform:translateX(-50%); }
-#a-down  { bottom:8px; left:50%; transform:translateX(-50%); }
-#a-left  { left:8px;   top:50%;  transform:translateY(-50%); }
-#a-right { right:8px;  top:50%;  transform:translateY(-50%); }
-
-#joy-knob {
-  position: absolute;
-  width: 66px; height: 66px;
-  top:50%; left:50%;
-  transform: translate(-50%,-50%);
-  border-radius: 50%;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  cursor: grab;
-  transition: border-color .1s;
-  z-index: 2;
-  will-change: transform;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#joy-knob.drag { border-color: var(--accent); cursor: grabbing; }
-#joy-knob-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: .5;
-}
-#joy-knob.drag #joy-knob-dot { opacity: 1; }
-
-/* Right panel */
-#ctrl-right {
-  display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.stat-row {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.stat-value {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.1;
-}
-
-.stat-sub {
-  font-size: 10px;
-  color: var(--muted);
-}
-
-#mode-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: var(--amber-bg);
-  color: var(--amber);
-}
-#mode-badge.manual {
-  background: var(--blue-bg);
-  color: var(--blue);
-}
-
-.icon-btn {
-  display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  width: 100%;
-  padding: 8px 0;
-  border-radius: 8px;
-  border: 1.5px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  font-family: 'Poppins', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background .15s, border-color .15s, color .15s;
+  padding: 14px;
 }
-.icon-btn:hover { border-color: var(--accent); background: var(--bg); }
-.icon-btn:active { background: var(--bg); }
-.icon-btn.danger { border-color: var(--red); color: var(--red); background: var(--red-bg); }
 
-.dist-display {
+.dpad-section-label {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--muted);
+  align-self: flex-start;
+}
+
+.dpad-grid {
+  display: grid;
+  grid-template-columns: 56px 56px 56px;
+  grid-template-rows: 56px 56px 56px;
+  gap: 5px;
+}
+
+.dpad-btn {
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 10px; border: 1.5px solid var(--border);
+  background: var(--bg); color: var(--accent);
+  cursor: pointer; transition: background .1s, border-color .1s, transform .08s;
+  -webkit-tap-highlight-color: transparent;
+}
+.dpad-btn:active, .dpad-btn.pressed {
+  background: var(--accent); border-color: var(--accent); color: white;
+  transform: scale(.94);
+}
+.dpad-btn.center {
+  background: var(--red-bg);
+  border-color: var(--red);
+  color: var(--red);
+}
+.dpad-btn.center:active, .dpad-btn.center.pressed {
+  background: var(--red);
+  border-color: var(--red);
+  color: white;
+}
+.dpad-corner { border: none; background: transparent; pointer-events: none; }
+
+/* Servo section inside dpad panel */
+.servo-section {
+  width: 100%;
   display: flex;
-  align-items: baseline;
-  gap: 4px;
+  flex-direction: column;
+  gap: 5px;
   margin-top: 4px;
 }
-.dist-num {
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1;
-  min-width: 48px;
-}
-.dist-unit {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 500;
-}
 
-/* ── LEDs pane ── */
-#pane-leds.active {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
-}
-
-.led-grid {
+.servo-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 5px;
 }
 
-.led-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 18px 8px;
-  border-radius: var(--r);
+.servo-btn {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 9px 6px; border-radius: 9px;
   border: 1.5px solid var(--border);
-  background: var(--surface);
-  color: var(--muted);
-  font-family: 'Poppins', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all .15s;
+  background: var(--bg); color: var(--text);
+  font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 500;
+  cursor: pointer; transition: background .15s, border-color .15s, color .15s;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center; line-height: 1.2;
 }
-.led-btn:active { transform: scale(.97); }
-.led-btn.active-on {
+.servo-btn:active { transform: scale(.96); }
+.servo-btn.purple-style {
+  border-color: var(--purple);
+  background: var(--purple-bg);
+  color: var(--purple);
+}
+.servo-btn.amber-style {
   border-color: var(--amber);
   background: var(--amber-bg);
   color: var(--amber);
 }
-.led-btn.active-blink {
-  border-color: var(--blue);
-  background: var(--blue-bg);
-  color: var(--blue);
+
+/* Right panel */
+#ctrl-right { display: flex; flex-direction: column; gap: 8px; }
+
+.stat-value { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.1; }
+.stat-sub { font-size: 10px; color: var(--muted); }
+
+#mode-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600; padding: 3px 8px;
+  border-radius: 6px; background: var(--amber-bg); color: var(--amber);
 }
+#mode-badge.manual { background: var(--blue-bg); color: var(--blue); }
+
+.icon-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 8px 0; border-radius: 8px;
+  border: 1.5px solid var(--border); background: transparent; color: var(--text);
+  font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: background .15s, border-color .15s, color .15s;
+}
+.icon-btn:hover { border-color: var(--accent); background: var(--bg); }
+.icon-btn.danger { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+
+.dist-display { display: flex; align-items: baseline; gap: 4px; margin-top: 4px; }
+.dist-num {
+  font-size: 26px; font-weight: 700; color: var(--text);
+  line-height: 1; min-width: 48px;
+}
+.dist-unit { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+/* ── Scanning animation ── */
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+.scanning-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--purple); position: relative; display: inline-block; margin-right: 4px;
+}
+.scanning-dot::after {
+  content:''; position: absolute; inset: -3px;
+  border-radius: 50%; border: 1.5px solid var(--purple);
+  animation: pulse-ring .9s ease-out infinite;
+}
+
+/* ── LEDs pane ── */
+#pane-leds.active {
+  display: flex; flex-direction: column; gap: 8px; overflow-y: auto;
+}
+.led-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.led-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 18px 8px; border-radius: var(--r);
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--muted); font-family: 'Poppins', sans-serif;
+  font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s;
+}
+.led-btn:active { transform: scale(.97); }
+.led-btn.active-on  { border-color: var(--amber); background: var(--amber-bg); color: var(--amber); }
+.led-btn.active-blink { border-color: var(--blue); background: var(--blue-bg); color: var(--blue); }
 
 /* ── Config pane ── */
 #pane-cfg.active {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 8px; overflow-y: auto;
 }
-
-.cfg-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.cfg-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-}
-.cfg-desc {
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.range-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
+.cfg-row { display: flex; flex-direction: column; gap: 6px; }
+.cfg-label { font-size: 13px; font-weight: 500; color: var(--text); }
+.cfg-desc { font-size: 11px; color: var(--muted); }
+.range-row { display: flex; align-items: center; gap: 10px; }
 input[type="range"] {
-  -webkit-appearance: none;
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border);
-  outline: none;
+  -webkit-appearance: none; flex: 1; height: 4px;
+  border-radius: 2px; background: var(--border); outline: none;
 }
 input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  background: var(--accent);
-  cursor: pointer;
+  -webkit-appearance: none; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--accent); cursor: pointer;
 }
-
-.range-val {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  min-width: 44px;
-  text-align: right;
-}
-
+.range-val { font-size: 14px; font-weight: 600; color: var(--text); min-width: 44px; text-align: right; }
 .apply-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  background: var(--accent);
-  color: white;
-  font-family: 'Poppins', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity .15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px; border-radius: 8px; border: none;
+  background: var(--accent); color: white;
+  font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: opacity .15s;
 }
 .apply-btn:active { opacity: .8; }
 .apply-btn:disabled { opacity: .4; cursor: not-allowed; }
-
-.divider {
-  height: 1px;
-  background: var(--border);
-}
-
-.info-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.info-key {
-  font-size: 12px;
-  color: var(--muted);
-}
-.info-val {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-/* stop button area */
-#stop-area {
-  position: absolute;
-  bottom: 0; right: 0;
-}
-
+.divider { height: 1px; background: var(--border); }
+.info-row { display: flex; align-items: center; justify-content: space-between; }
+.info-key { font-size: 12px; color: var(--muted); }
+.info-val { font-size: 12px; font-weight: 500; color: var(--text); }
 </style>
 </head>
 <body>
@@ -534,25 +368,71 @@ input[type="range"]::-webkit-slider-thumb {
 
     <!-- Controle -->
     <div class="tab-pane active" id="pane-ctrl" style="position:absolute;inset:0;">
-      <!-- Joystick -->
-      <div id="joy-panel">
-        <div id="joy-zone">
-          <div id="joy-base">
-            <div id="deadzone-ring"></div>
-            <span class="arr" id="a-up">
-              <svg width="12" height="12" viewBox="0 0 24 24"><polygon points="12 4 20 18 4 18" fill="#9ca3af"/></svg>
-            </span>
-            <span class="arr" id="a-down">
-              <svg width="12" height="12" viewBox="0 0 24 24"><polygon points="12 20 4 6 20 6" fill="#9ca3af"/></svg>
-            </span>
-            <span class="arr" id="a-left">
-              <svg width="12" height="12" viewBox="0 0 24 24"><polygon points="4 12 18 4 18 20" fill="#9ca3af"/></svg>
-            </span>
-            <span class="arr" id="a-right">
-              <svg width="12" height="12" viewBox="0 0 24 24"><polygon points="20 12 6 4 6 20" fill="#9ca3af"/></svg>
-            </span>
+
+      <!-- D-Pad + Servo -->
+      <div id="dpad-panel">
+        <span class="dpad-section-label">Movimento</span>
+
+        <div class="dpad-grid">
+          <!-- Row 1 -->
+          <div class="dpad-btn dpad-corner"></div>
+          <button class="dpad-btn" id="btn-fwd" aria-label="Frente">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"/>
+            </svg>
+          </button>
+          <div class="dpad-btn dpad-corner"></div>
+
+          <!-- Row 2 -->
+          <button class="dpad-btn" id="btn-left" aria-label="Esquerda">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <button class="dpad-btn center" id="btn-stop" aria-label="Parar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+            </svg>
+          </button>
+          <button class="dpad-btn" id="btn-right" aria-label="Direita">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+
+          <!-- Row 3 -->
+          <div class="dpad-btn dpad-corner"></div>
+          <button class="dpad-btn" id="btn-bwd" aria-label="Ré">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <div class="dpad-btn dpad-corner"></div>
+        </div>
+
+        <!-- Servo controls -->
+        <div class="servo-section">
+          <span class="dpad-section-label" style="margin-top:2px;">Cabeça (Servo)</span>
+          <div class="servo-row">
+            <button class="servo-btn purple-style" id="btn-scan" onclick="startScan()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+              </svg>
+              Varrer
+            </button>
+            <button class="servo-btn amber-style" onclick="sendCmd('N')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 12h6"/><path d="M12 3v3M12 18v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M3 12H1M23 12h-2M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+              </svg>
+              Negar
+            </button>
           </div>
-          <div id="joy-knob"><div id="joy-knob-dot"></div></div>
+          <button class="servo-btn" style="width:100%;" onclick="sendCmd('H')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+            Ler distância (frente)
+          </button>
         </div>
       </div>
 
@@ -584,18 +464,6 @@ input[type="range"]::-webkit-slider-thumb {
                 <path d="M21 12a9 9 0 11-6.219-8.56"/>
               </svg>
               Trocar modo
-            </button>
-            <button class="icon-btn" onclick="scanHead()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-              </svg>
-              Ler distância
-            </button>
-            <button class="icon-btn danger" onclick="sendCmd('S')" ontouchstart="sendCmd('S')">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-              </svg>
-              Parar
             </button>
           </div>
         </div>
@@ -661,25 +529,13 @@ input[type="range"]::-webkit-slider-thumb {
         <span class="card-label">Informações do dispositivo</span>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
           <div class="divider"></div>
-          <div class="info-row">
-            <span class="info-key">Nome BLE</span>
-            <span class="info-val">Robo_ESP32</span>
-          </div>
+          <div class="info-row"><span class="info-key">Nome BLE</span><span class="info-val">Robo_ESP32</span></div>
           <div class="divider"></div>
-          <div class="info-row">
-            <span class="info-key">Dispositivo</span>
-            <span class="info-val" id="info-device">—</span>
-          </div>
+          <div class="info-row"><span class="info-key">Dispositivo</span><span class="info-val" id="info-device">—</span></div>
           <div class="divider"></div>
-          <div class="info-row">
-            <span class="info-key">Conexão</span>
-            <span class="info-val" id="info-conn">Desconectado</span>
-          </div>
+          <div class="info-row"><span class="info-key">Conexão</span><span class="info-val" id="info-conn">Desconectado</span></div>
           <div class="divider"></div>
-          <div class="info-row">
-            <span class="info-key">Dist. configurada</span>
-            <span class="info-val" id="info-dist-cfg">50 cm</span>
-          </div>
+          <div class="info-row"><span class="info-key">Dist. configurada</span><span class="info-val" id="info-dist-cfg">50 cm</span></div>
         </div>
       </div>
     </div>
@@ -718,21 +574,18 @@ const CHARACTERISTIC_UUID = 'abcd1234-ab12-ab12-ab12-abcdef123456';
 
 const st = {
   device: null, server: null, char: null,
-  connected: false, dragging: false,
-  cx: 0, cy: 0, radius: 0,
+  connected: false,
   currentCmd: '', lastCmd: '',
   modoAuto: true,
   ledState: 'unknown',
   sendTimer: null,
   configuredDist: 50,
+  scanning: false,
 };
 
-const DEAD = 24;
 const RATE = 120;
 
 // DOM
-const knob      = document.getElementById('joy-knob');
-const base      = document.getElementById('joy-base');
 const cmdValEl  = document.getElementById('cmd-val');
 const modeEl    = document.getElementById('mode-badge');
 const btSt      = document.getElementById('bt-status');
@@ -741,18 +594,12 @@ const btnConn   = document.getElementById('btn-connect-header');
 const btnLabel  = document.getElementById('btn-conn-label');
 const distVal   = document.getElementById('dist-val');
 const distSt    = document.getElementById('dist-status');
-const arrs = {
-  up:    document.getElementById('a-up'),
-  down:  document.getElementById('a-down'),
-  left:  document.getElementById('a-left'),
-  right: document.getElementById('a-right'),
-};
 
 if (!navigator.bluetooth) {
   document.getElementById('overlay').classList.add('show');
 }
 
-// Tabs
+// ── Tabs ──
 function switchTab(id, btn) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -760,27 +607,22 @@ function switchTab(id, btn) {
   btn.classList.add('active');
 }
 
-// Bluetooth
+// ── Bluetooth ──
 async function btConnect() {
   if (st.connected) { btDisconnect(); return; }
-
   btnLabel.textContent = 'Buscando...';
   btnConn.disabled = true;
-
   try {
     st.device = await navigator.bluetooth.requestDevice({
       filters: [{ name: 'Robo_ESP32' }],
       optionalServices: [SERVICE_UUID],
     });
-
     st.device.addEventListener('gattserverdisconnected', onDisconnected);
     st.server = await st.device.gatt.connect();
     const service = await st.server.getPrimaryService(SERVICE_UUID);
     st.char = await service.getCharacteristic(CHARACTERISTIC_UUID);
-
     await st.char.startNotifications();
     st.char.addEventListener('characteristicvaluechanged', onNotify);
-
     setConnected(true);
   } catch (err) {
     console.warn('[BT]', err);
@@ -795,7 +637,7 @@ function btDisconnect() {
 
 function onDisconnected() {
   setConnected(false);
-  sendStop();
+  sendCmd('S');
 }
 
 function setConnected(ok) {
@@ -809,20 +651,30 @@ function setConnected(ok) {
   document.getElementById('info-conn').textContent = ok ? 'Ativo' : 'Desconectado';
 }
 
-// Notificações recebidas do ESP32 (distância, etc.)
 function onNotify(event) {
   const val = new TextDecoder().decode(event.target.value).trim();
   if (val.startsWith('D:')) {
     const cm = parseInt(val.slice(2));
     if (!isNaN(cm)) {
       distVal.textContent = cm;
-      distSt.textContent = cm > 0 ? (cm < st.configuredDist ? 'obstáculo próximo' : 'caminho livre') : 'sem eco';
+      distSt.textContent = cm > 0
+        ? (cm < st.configuredDist ? 'obstáculo próximo' : 'caminho livre')
+        : 'sem eco';
+    }
+    // If we were scanning, update the label
+    if (st.scanning) {
+      distSt.textContent = `varredura: ${distVal.textContent} cm`;
     }
   }
 }
 
+// ── Commands ──
 async function sendCmd(cmd) {
-  const labels = { S:'Parar', F:'Frente', B:'Ré', L:'Esquerda', R:'Direita', A:'Modo', H:'Escanear', '1':'LED on', '0':'LED off', P:'LED piscar' };
+  const labels = {
+    S:'Parar', F:'Frente', B:'Ré', L:'Esquerda', R:'Direita',
+    A:'Modo', H:'Ler distância', '1':'LED on', '0':'LED off',
+    P:'LED piscar', N:'Negar (servo)', V:'Varrer (servo)'
+  };
   if (cmd !== st.lastCmd) {
     st.lastCmd = cmd;
     cmdValEl.textContent = labels[cmd] ?? cmd;
@@ -835,59 +687,103 @@ async function sendCmd(cmd) {
   }
 }
 
-// Scan da cabeça + leitura de distância
-function scanHead() {
-  sendCmd('H');
+// ── D-Pad button logic ──
+// Hold to move, release to stop
+function setupHoldBtn(btnId, cmd) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+
+  function start(e) {
+    e.preventDefault();
+    btn.classList.add('pressed');
+    sendCmd(cmd);
+    st.sendTimer = setInterval(() => sendCmd(cmd), RATE);
+  }
+  function stop(e) {
+    e.preventDefault();
+    btn.classList.remove('pressed');
+    clearInterval(st.sendTimer);
+    sendCmd('S');
+  }
+
+  btn.addEventListener('touchstart', start, { passive: false });
+  btn.addEventListener('touchend',   stop,  { passive: false });
+  btn.addEventListener('mousedown',  start);
+  btn.addEventListener('mouseup',    stop);
+  btn.addEventListener('mouseleave', stop);
 }
 
-// LEDs
-function ledOn() {
-  sendCmd('1');
-  st.ledState = 'on';
-  updateLedUI();
+setupHoldBtn('btn-fwd',  'F');
+setupHoldBtn('btn-bwd',  'B');
+setupHoldBtn('btn-left', 'L');
+setupHoldBtn('btn-right','R');
+
+// Stop button: just tap
+const btnStop = document.getElementById('btn-stop');
+function tapStop(e) {
+  e.preventDefault();
+  btnStop.classList.add('pressed');
+  sendCmd('S');
+  setTimeout(() => btnStop.classList.remove('pressed'), 150);
 }
+btnStop.addEventListener('touchstart', tapStop, { passive: false });
+btnStop.addEventListener('mousedown',  tapStop);
 
-function ledOff() {
-  sendCmd('0');
-  st.ledState = 'off';
-  updateLedUI();
-}
-
-function ledBlink() {
-  sendCmd('P');
-  st.ledState = 'blink';
-  updateLedUI();
-}
-
-function updateLedUI() {
-  const ind = document.getElementById('led-indicator');
-  const txt = document.getElementById('led-state-text');
-  const btnOn    = document.getElementById('led-on-btn');
-  const btnOff   = document.getElementById('led-off-btn');
-  const btnBlink = document.getElementById('led-blink-btn');
-
-  btnOn.classList.remove('active-on','active-blink');
-  btnOff.classList.remove('active-on','active-blink');
-  btnBlink.classList.remove('active-on','active-blink');
-
-  if (st.ledState === 'on') {
-    ind.style.background = '#d97706';
-    txt.textContent = 'Ligado';
-    btnOn.classList.add('active-on');
-  } else if (st.ledState === 'blink') {
-    ind.style.background = '#2563eb';
-    txt.textContent = 'Piscando';
-    btnBlink.classList.add('active-blink');
+// ── Servo: Scan (sweep) ──
+function startScan() {
+  const btn = document.getElementById('btn-scan');
+  if (st.scanning) {
+    // Stop scan
+    st.scanning = false;
+    btn.textContent = '';
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+    </svg> Varrer`;
+    btn.classList.remove('active-scan');
+    sendCmd('S'); // tell ESP32 to stop scanning
+    distSt.textContent = 'varredura encerrada';
+    if (st.scanInterval) { clearInterval(st.scanInterval); st.scanInterval = null; }
   } else {
-    ind.style.background = 'var(--border)';
-    txt.textContent = 'Apagado';
+    // Start scan
+    st.scanning = true;
+    btn.innerHTML = `<span class="scanning-dot"></span> Parar`;
+    distSt.textContent = 'varrendo...';
+    sendCmd('V'); // start sweep on ESP32
+    // Periodically re-send V so ESP32 knows to keep scanning (optional heartbeat)
+    st.scanInterval = setInterval(() => {
+      if (st.scanning) sendCmd('V');
+    }, 2000);
   }
 }
 
-// Config
-function onRangeInput(v) {
-  document.getElementById('range-display').textContent = v;
+// ── Servo: Negar (shake head) ──
+// Just sends 'N', ESP32 handles the animation
+
+// ── LEDs ──
+function ledOn()    { sendCmd('1'); st.ledState = 'on';    updateLedUI(); }
+function ledOff()   { sendCmd('0'); st.ledState = 'off';   updateLedUI(); }
+function ledBlink() { sendCmd('P'); st.ledState = 'blink'; updateLedUI(); }
+
+function updateLedUI() {
+  const ind      = document.getElementById('led-indicator');
+  const txt      = document.getElementById('led-state-text');
+  const btnOn    = document.getElementById('led-on-btn');
+  const btnOff   = document.getElementById('led-off-btn');
+  const btnBlink = document.getElementById('led-blink-btn');
+  btnOn.classList.remove('active-on','active-blink');
+  btnOff.classList.remove('active-on','active-blink');
+  btnBlink.classList.remove('active-on','active-blink');
+  if (st.ledState === 'on') {
+    ind.style.background = '#d97706'; txt.textContent = 'Ligado'; btnOn.classList.add('active-on');
+  } else if (st.ledState === 'blink') {
+    ind.style.background = '#2563eb'; txt.textContent = 'Piscando'; btnBlink.classList.add('active-blink');
+  } else {
+    ind.style.background = 'var(--border)'; txt.textContent = 'Apagado';
+  }
 }
+
+// ── Config ──
+function onRangeInput(v) { document.getElementById('range-display').textContent = v; }
 
 function applyDistance() {
   const v = parseInt(document.getElementById('dist-range').value);
@@ -897,108 +793,13 @@ function applyDistance() {
   sendCmd(cmd);
 }
 
-// Joystick
-function calibrate() {
-  const r = base.getBoundingClientRect();
-  st.cx = r.left + r.width / 2;
-  st.cy = r.top  + r.height / 2;
-  st.radius = r.width / 2 - 8;
-}
-
-function pos(e) {
-  const t = e.touches ? e.touches[0] : e;
-  return { x: t.clientX, y: t.clientY };
-}
-
-function moveKnob(px, py) {
-  let dx = px - st.cx;
-  let dy = py - st.cy;
-  const dist = Math.hypot(dx, dy);
-  if (dist > st.radius) {
-    dx = (dx / dist) * st.radius;
-    dy = (dy / dist) * st.radius;
-  }
-  knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-
-  const inDead = dist < DEAD;
-  let cmd = 'S';
-  if (!inDead) {
-    const angle = Math.atan2(-dy, dx) * (180 / Math.PI);
-    if      (angle >= -45 && angle <  45)  cmd = 'R';
-    else if (angle >=  45 && angle < 135)  cmd = 'F';
-    else if (angle >= 135 || angle < -135) cmd = 'L';
-    else                                   cmd = 'B';
-  }
-
-  const map = { up:'F', down:'B', left:'L', right:'R' };
-  Object.entries(arrs).forEach(([k, el]) => {
-    const active = map[k] === cmd;
-    el.classList.toggle('lit', active);
-    const svg = el.querySelector('polygon');
-    if (svg) svg.setAttribute('fill', active ? '#1a1a1a' : '#9ca3af');
-  });
-
-  st.currentCmd = cmd;
-}
-
-function sendStop() {
-  moveKnob(st.cx, st.cy);
-  sendCmd('S');
-  knob.classList.remove('drag');
-}
-
+// ── Mode toggle ──
 function toggleMode() {
   st.modoAuto = !st.modoAuto;
   modeEl.textContent = st.modoAuto ? 'Autônomo' : 'Manual';
   modeEl.className = st.modoAuto ? '' : 'manual';
   sendCmd('A');
 }
-
-base.addEventListener('touchstart', e => {
-  e.preventDefault();
-  calibrate();
-  st.dragging = true;
-  knob.classList.add('drag');
-  const { x, y } = pos(e);
-  moveKnob(x, y);
-  sendCmd(st.currentCmd);
-  st.sendTimer = setInterval(() => sendCmd(st.currentCmd), RATE);
-}, { passive: false });
-
-base.addEventListener('touchmove', e => {
-  e.preventDefault();
-  if (!st.dragging) return;
-  const { x, y } = pos(e);
-  moveKnob(x, y);
-}, { passive: false });
-
-base.addEventListener('touchend', e => {
-  e.preventDefault();
-  st.dragging = false;
-  clearInterval(st.sendTimer);
-  sendStop();
-}, { passive: false });
-
-base.addEventListener('mousedown', e => {
-  calibrate();
-  st.dragging = true;
-  knob.classList.add('drag');
-  moveKnob(e.clientX, e.clientY);
-  st.sendTimer = setInterval(() => sendCmd(st.currentCmd), RATE);
-});
-window.addEventListener('mousemove', e => {
-  if (!st.dragging) return;
-  moveKnob(e.clientX, e.clientY);
-});
-window.addEventListener('mouseup', () => {
-  if (!st.dragging) return;
-  st.dragging = false;
-  clearInterval(st.sendTimer);
-  sendStop();
-});
-
-window.addEventListener('resize', calibrate);
-calibrate();
 </script>
 </body>
 </html>
